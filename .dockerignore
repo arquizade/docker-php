@@ -1,0 +1,4 @@
+# Files/directories in this list won't be copied to
+.git
+.env
+.vscode

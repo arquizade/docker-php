@@ -1,0 +1,53 @@
+services:
+  app-nginx:
+    build:
+      dockerfile: .docker/nginx/Dockerfile
+      context: .
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - app-php
+    networks:
+      - app-network
+
+  app-php:
+    user: "${UID_GID}"
+    build:
+      dockerfile: .docker/php/Dockerfile
+      context: .
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    networks:
+      - app-network
+    depends_on:
+      - app-mysql
+    environment:
+      - DB_HOST=app-mysql
+      - DB_PORT=3306
+      - DB_DATABASE=laravel
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+  app-mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+    - "5555:3306"
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
