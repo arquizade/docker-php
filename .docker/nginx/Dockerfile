@@ -5,3 +5,5 @@ COPY .docker/nginx/config/default.conf /etc/nginx/conf.d/default.conf
 
 ## Copy all the code into the container
 COPY . /var/www/html
+
+WORKDIR /var/www/html
