@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# Function to check if Docker Compose is installed
+DOCKER_COMPOSE_V1="docker-compose"
+DOCKER_COMPOSE_V2="docker compose"
+
+# Function to check if Docker Compose is installed and determine the version
 check_docker_compose() {
-    if ! command -v docker compose &> /dev/null; then
+    if command -v $DOCKER_COMPOSE_V1 &> /dev/null; then
+        DOCKER_COMPOSE_CMD=$DOCKER_COMPOSE_V1
+    elif command -v $DOCKER_COMPOSE_V2 &> /dev/null; then
+        DOCKER_COMPOSE_CMD=$DOCKER_COMPOSE_V2
+    else
         echo "Docker Compose is not installed. Please install Docker Compose and try again."
         exit 1
     fi
@@ -36,20 +43,20 @@ if [ -f "$FLAG_FILE" ]; then
 fi
 
 # Build Docker containers
-docker compose up -d --build
+$DOCKER_COMPOSE_CMD up -d --build
 
 # Install PHP dependencies with Composer
-docker compose exec app-php composer install
+$DOCKER_COMPOSE_CMD exec app-php composer install
 
 # Set permissions for storage and bootstrap/cache
-docker compose exec app-php sh -c "chown -R www-data:www-data storage bootstrap/cache"
-docker compose exec app-php sh -c "find storage bootstrap/cache -type f ! -name '.gitignore' -exec chmod 664 {} \; -o -type d -exec chmod 775 {} \;"
+$DOCKER_COMPOSE_CMD exec app-php sh -c "chown -R www-data:www-data storage bootstrap/cache"
+$DOCKER_COMPOSE_CMD exec app-php sh -c "find storage bootstrap/cache -type f ! -name '.gitignore' -exec chmod 664 {} \; -o -type d -exec chmod 775 {} \;"
 
 # Generate application key
-docker compose exec app-php php artisan key:generate
+$DOCKER_COMPOSE_CMD exec app-php php artisan key:generate
 
 # Run migrations
-docker compose exec app-php php artisan migrate
+$DOCKER_COMPOSE_CMD exec app-php php artisan migrate
 
 # Create the flag file to indicate the installation is done
 touch "$FLAG_FILE"
