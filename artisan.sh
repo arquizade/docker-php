@@ -15,6 +15,14 @@ check_docker_compose() {
     fi
 }
 
+# Function to fix file permissions
+fix_permissions() {
+    # Assuming your container is named app-php and the Laravel project is in /var/www
+    USER_ID=$(id -u)
+    GROUP_ID=$(id -g)
+    $DOCKER_COMPOSE_CMD exec -u root app-php chown -R $USER_ID:$GROUP_ID /var/www
+}
+
 # Call the function to check for Docker Compose
 check_docker_compose
 
@@ -26,3 +34,6 @@ fi
 
 # Execute the artisan command with all provided arguments
 $DOCKER_COMPOSE_CMD exec app-php php artisan "$@"
+
+# Fix file permissions after running the artisan command
+fix_permissions
