@@ -48,9 +48,8 @@ $DOCKER_COMPOSE_CMD up -d --build
 # Install PHP dependencies with Composer
 $DOCKER_COMPOSE_CMD exec app-php composer install
 
-# Set permissions for storage and bootstrap/cache
-$DOCKER_COMPOSE_CMD exec app-php sh -c "chown -R www-data:www-data storage bootstrap/cache"
-$DOCKER_COMPOSE_CMD exec app-php sh -c "find storage bootstrap/cache -type f ! -name '.gitignore' -exec chmod 664 {} \; -o -type d -exec chmod 775 {} \;"
+# Set permissions for storage and bootstrap/cache, excluding .gitignore
+$DOCKER_COMPOSE_CMD exec app-php sh -c "find storage bootstrap/cache -type f ! -name '.gitignore' -exec chown www-data:www-data {} \; -exec chmod 664 {} \; -o -type d -exec chown www-data:www-data {} \; -exec chmod 775 {} \;"
 
 # Generate application key
 $DOCKER_COMPOSE_CMD exec app-php php artisan key:generate
