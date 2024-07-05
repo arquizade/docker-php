@@ -2,6 +2,7 @@
 
 DOCKER_COMPOSE_V1="docker-compose"
 DOCKER_COMPOSE_V2="docker compose"
+DOCKER_COMPOSE_CMD=""
 
 # Function to check if Docker Compose is installed and determine the version
 check_docker_compose() {
@@ -15,8 +16,20 @@ check_docker_compose() {
     fi
 }
 
-# Call the function to check for Docker Compose
-check_docker_compose
+# Function to check if running under WSL
+check_wsl() {
+    if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
+        DOCKER_COMPOSE_CMD=$DOCKER_COMPOSE_V2
+    fi
+}
+
+# Check if running under WSL
+check_wsl
+
+# If not determined by WSL check, determine Docker Compose version
+if [ -z "$DOCKER_COMPOSE_CMD" ]; then
+    check_docker_compose
+fi
 
 # Define the flag file
 FLAG_FILE="./.install_done"
